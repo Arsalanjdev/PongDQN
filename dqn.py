@@ -3,7 +3,6 @@ The architecture of DQN network tasked with learning to play Atari Ping-Pong.
 It consists of a CNN followed by a fully connected layer of Dense layers.
 """
 
-from typing import List
 import torch
 import torch.nn as nn
 

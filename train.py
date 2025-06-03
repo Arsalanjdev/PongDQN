@@ -17,7 +17,7 @@ import ale_py as ale
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 MEAN_REWARD_BOUND = 19  # reward boundary for the last 100 episodes to stop training
 GAMMA = 0.99
-BATCH_SIZE = 32
+BATCH_SIZE = 16
 REPLAY_SIZE = 10000  # maximum capacity of the buffer
 LEARNING_RATE = 1e-4
 SYNC_TARGET_FRAMES = 1000  # How frequently sync the training model to the target model
@@ -152,7 +152,9 @@ if __name__ == "__main__":
     training_network = dqn.DQN(env.observation_space.shape, env.action_space.n).to(
         device
     )
+    training_network.load_state_dict(torch.load("-params-best--19.3.dat"))
     target_network = dqn.DQN(env.observation_space.shape, env.action_space.n).to(device)
+    target_network.load_state_dict(training_network.state_dict())
     writer = SummaryWriter(comment="dqn-ping-pong")
     print(training_network)
     buffer = ExperienceBuffer(REPLAY_SIZE)
@@ -160,12 +162,14 @@ if __name__ == "__main__":
     epsilon = EPSILON_START
     total_rewards = []
     optimizer = torch.optim.Adam(training_network.parameters(), lr=LEARNING_RATE)
-    frame_index = 0  # frame counter
+    # frame_index = 0  # frame counter
+    frame_index = 1
     ts_frame = 0
     ts = time.time()
     best_m_reward = None
-
+    EPSILON_START = 0.5
     while True:
+        ### for continuing training
         frame_index += 1
         epsilon = max(
             EPSILON_STOP, EPSILON_START - frame_index / EPSILON_DECAY_LAST_FRAME
@@ -207,4 +211,5 @@ if __name__ == "__main__":
         loss = calc_loss(batch, training_network, target_network)
         loss.backward()
         optimizer.step()
+        # time.sleep(1)  # To reduce heat on my pc
     writer.close()
