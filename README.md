@@ -11,6 +11,7 @@ git clone https://github.com/Arsalanjdev/PongDQN
 cd PongDQN
 pip install -r requirements.txt
 ```
+Then cd into a directory of choice and run train.py inside the directory of the chosen implementation. 
 
 ## TODO
 - Add support for Double DQN
