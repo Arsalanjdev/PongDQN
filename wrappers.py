@@ -58,15 +58,28 @@ class BufferWrapper(gym.ObservationWrapper):
         return np.concatenate(self.buffer)
 
 
-def make_env(env_name: str, **kwargs):
+def make_env(
+    env_name: str, record_video: bool = False, video_folder: str = "videos/", **kwargs
+):
     """
     Factory method for creating a new gym.Env instance wrapped around custom wrappers.
-    :param env_name:
-    :param kwargs:
-    :return:
+    :param env_name: Gym environment name.
+    :param record_video: Whether to record gameplay video.
+    :param video_folder: Directory where video will be saved.
+    :param kwargs: Extra args for gym.make.
+    :return: Wrapped gym.Env instance.
     """
     env = gym.make(env_name, **kwargs)
+
+    if record_video:
+        from gymnasium.wrappers import RecordVideo
+
+        env = RecordVideo(
+            env, video_folder=video_folder, episode_trigger=lambda ep: ep % 50 == 0
+        )
+
     env = atari_wrappers.AtariWrapper(env, clip_reward=False, noop_max=0)
     env = ImageToPyTorch(env)
     env = BufferWrapper(env, n_steps=4)
+
     return env

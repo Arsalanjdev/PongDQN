@@ -2,6 +2,7 @@
 
 ale-py==0.11.0
 gymnasium==1.1.1
+# gymnasium[other]
 numpy==2.2.5
 stable_baselines3==2.6.0
 torch==2.7.0

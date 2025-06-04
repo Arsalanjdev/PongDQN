@@ -3,13 +3,13 @@ from dataclasses import dataclass
 from typing import Tuple, Optional, List
 
 import numpy as np
+from gymnasium.wrappers import RecordVideo
 from torch.utils.tensorboard import SummaryWriter
 import time
 import wrappers
 import dqn
 import torch
 import torch.nn as nn
-import torch.optim as optim
 import gymnasium as gym
 import ale_py as ale
 
@@ -22,7 +22,7 @@ REPLAY_SIZE = 10000  # maximum capacity of the buffer
 LEARNING_RATE = 1e-4
 SYNC_TARGET_FRAMES = 1000  # How frequently sync the training model to the target model
 EPSILON_DECAY_LAST_FRAME = (
-    150000  # epsilon is decayed to final value after this much frames
+    500000  # epsilon is decayed to final value after this much frames
 )
 
 EPSILON_START = 1.0
@@ -148,11 +148,14 @@ def calc_loss(
 
 
 if __name__ == "__main__":
-    env = wrappers.make_env("PongNoFrameskip-v4")
+    env = wrappers.make_env(
+        "PongNoFrameskip-v4", record_video=True, render_mode="rgb_array"
+    )
+
     training_network = dqn.DQN(env.observation_space.shape, env.action_space.n).to(
         device
     )
-    training_network.load_state_dict(torch.load("-params-best--19.3.dat"))
+    # training_network.load_state_dict(torch.load("-params-best--19.3.dat"))
     target_network = dqn.DQN(env.observation_space.shape, env.action_space.n).to(device)
     target_network.load_state_dict(training_network.state_dict())
     writer = SummaryWriter(comment="dqn-ping-pong")
